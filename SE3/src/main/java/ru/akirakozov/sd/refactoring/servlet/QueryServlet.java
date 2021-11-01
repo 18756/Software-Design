@@ -1,5 +1,8 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import ru.akirakozov.sd.refactoring.DataBase;
+import ru.akirakozov.sd.refactoring.Product;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -8,6 +11,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.List;
 
 /**
  * @author akirakozov
@@ -19,45 +23,27 @@ public class QueryServlet extends HttpServlet {
 
         if ("max".equals(command)) {
             try {
-                try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                    Statement stmt = c.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
-                    response.getWriter().println("<html><body>");
-                    response.getWriter().println("<h1>Product with max price: </h1>");
-
-                    while (rs.next()) {
-                        String  name = rs.getString("name");
-                        int price  = rs.getInt("price");
-                        response.getWriter().println(name + "\t" + price + "</br>");
-                    }
-                    response.getWriter().println("</body></html>");
-
-                    rs.close();
-                    stmt.close();
+                response.getWriter().println("<html><body>");
+                response.getWriter().println("<h1>Product with max price: </h1>");
+                String sql = "SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1";
+                List<Product> products = DataBase.makeSqlGetQuery(sql);
+                for (Product product : products) {
+                    response.getWriter().println(product.name + "\t" + product.price + "</br>");
                 }
-
+                response.getWriter().println("</body></html>");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else if ("min".equals(command)) {
             try {
-                try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                    Statement stmt = c.createStatement();
-                    ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
-                    response.getWriter().println("<html><body>");
-                    response.getWriter().println("<h1>Product with min price: </h1>");
-
-                    while (rs.next()) {
-                        String  name = rs.getString("name");
-                        int price  = rs.getInt("price");
-                        response.getWriter().println(name + "\t" + price + "</br>");
-                    }
-                    response.getWriter().println("</body></html>");
-
-                    rs.close();
-                    stmt.close();
+                response.getWriter().println("<html><body>");
+                response.getWriter().println("<h1>Product with min price: </h1>");
+                String sql = "SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1";
+                List<Product> products = DataBase.makeSqlGetQuery(sql);
+                for (Product product : products) {
+                    response.getWriter().println(product.name + "\t" + product.price + "</br>");
                 }
-
+                response.getWriter().println("</body></html>");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

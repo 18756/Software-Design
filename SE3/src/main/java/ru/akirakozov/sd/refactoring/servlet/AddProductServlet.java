@@ -1,5 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import ru.akirakozov.sd.refactoring.DataBase;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -19,13 +21,9 @@ public class AddProductServlet extends HttpServlet {
         long price = Long.parseLong(request.getParameter("price"));
 
         try {
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                String sql = "INSERT INTO PRODUCT " +
-                        "(NAME, PRICE) VALUES (\"" + name + "\"," + price + ")";
-                Statement stmt = c.createStatement();
-                stmt.executeUpdate(sql);
-                stmt.close();
-            }
+            String sql = "INSERT INTO PRODUCT " +
+                    "(NAME, PRICE) VALUES (\"" + name + "\"," + price + ")";
+            DataBase.makeSqlUpdateQuery(sql);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

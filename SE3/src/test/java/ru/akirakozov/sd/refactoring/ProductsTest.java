@@ -27,7 +27,7 @@ public class ProductsTest {
         cleanDataBase();
         serverThread = new Thread(() -> {
             try {
-                Main.main(null);
+                Main.runServer();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -48,21 +48,20 @@ public class ProductsTest {
     }
 
     @AfterEach
-    public void tearDown() throws SQLException, InterruptedException {
-        serverThread.interrupt();
+    public void tearDown() throws Exception {
+        Main.stopServer();
         serverThread.join();
         cleanDataBase();
     }
 
     private void cleanDataBase() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            String sql = "DROP TABLE PRODUCT";
+        DataBase.makeSqlUpdateQuery("DROP TABLE IF EXISTS PRODUCT");
+        /*try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+            String sql = "DROP TABLE IF EXISTS PRODUCT";
             Statement stmt = c.createStatement();
             stmt.executeUpdate(sql);
             stmt.close();
-        } catch (SQLException e) {
-            // no PRODUCT table
-        }
+        }*/
     }
 
     private String makeQuery(String url) {
@@ -121,6 +120,8 @@ public class ProductsTest {
         Assertions.assertEquals(makeHtml("Summary price: 0"), makeCommand("sum", true));
         Assertions.assertEquals(makeHtml("<h1>Product with max price: </h1>"), makeCommand("max", true));
         Assertions.assertEquals(makeHtml("<h1>Product with min price: </h1>"), makeCommand("min", true));
+        Assertions.assertEquals(makeHtml("Number of products: 0"), makeCommand("count", true));
+
     }
 
     @Test
@@ -130,6 +131,7 @@ public class ProductsTest {
         Assertions.assertEquals(makeHtml("Summary price: 10"), makeCommand("sum", true));
         Assertions.assertEquals(makeHtml("<h1>Product with max price: </h1>p1\t10</br>"), makeCommand("max", true));
         Assertions.assertEquals(makeHtml("<h1>Product with min price: </h1>p1\t10</br>"), makeCommand("min", true));
+        Assertions.assertEquals(makeHtml("Number of products: 1"), makeCommand("count", true));
     }
 
     @Test
@@ -139,6 +141,7 @@ public class ProductsTest {
         Assertions.assertEquals(makeHtml("Summary price: 30"), makeCommand("sum", true));
         Assertions.assertEquals(makeHtml("<h1>Product with max price: </h1>p2\t20</br>"), makeCommand("max", true));
         Assertions.assertEquals(makeHtml("<h1>Product with min price: </h1>p1\t10</br>"), makeCommand("min", true));
+        Assertions.assertEquals(makeHtml("Number of products: 2"), makeCommand("count", true));
     }
 
     @RepeatedTest(3)
@@ -175,6 +178,10 @@ public class ProductsTest {
         addProducts(products);
         Assertions.assertEquals(makeHtml("Summary price: " + sumPrice),
                 makeCommand("sum", true));
+
+        Assertions.assertEquals(makeHtml("Number of products: " + products.size()),
+                makeCommand("count", true));
+
 
         List<Product> getProductResponse = parseResponse(
                 getProducts(true),
@@ -221,29 +228,4 @@ public class ProductsTest {
             throw new Exception("Incorrect response format: \n" + response);
         }
     }
-
-
-    static class Product {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Product product = (Product) o;
-            return price == product.price && Objects.equals(name, product.name);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(name, price);
-        }
-
-        public Product(String name, int price) {
-            this.name = name;
-            this.price = price;
-        }
-
-        String name;
-        int price;
-    }
-
 }
