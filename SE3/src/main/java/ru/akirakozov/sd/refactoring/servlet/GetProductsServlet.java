@@ -7,9 +7,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,7 +18,7 @@ public class GetProductsServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             response.getWriter().println("<html><body>");
-            List<Product> products = DataBase.makeSqlGetQuery("SELECT * FROM PRODUCT");
+            List<Product> products = DataBase.getProductsBySql("SELECT * FROM PRODUCT");
             for (Product product : products) {
                 response.getWriter().println(product.name + "\t" + product.price + "</br>");
             }

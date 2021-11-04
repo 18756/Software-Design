@@ -28,7 +28,7 @@ public class DataBase {
         closeConnection();
     }
 
-    public static List<Product> makeSqlGetQuery(String sql) throws SQLException {
+    public static List<Product> getProductsBySql(String sql) throws SQLException {
         openConnection();
         ResultSet rs = stmt.executeQuery(sql);
         List<Product> products = new ArrayList<>();
@@ -40,5 +40,13 @@ public class DataBase {
         rs.close();
         closeConnection();
         return products;
+    }
+
+    public static void makeSqlGetQuery(String sql, Consumer<ResultSet> consumer) throws SQLException {
+        openConnection();
+        ResultSet rs = stmt.executeQuery(sql);
+        consumer.accept(rs);
+        rs.close();
+        closeConnection();
     }
 }
