@@ -18,13 +18,7 @@ public class GetProductsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HtmlWriter htmlWriter = new HtmlWriter(response.getWriter());
-        try {
-            String sql = "SELECT * FROM PRODUCT";
-            List<Product> products = DataBase.getProductsBySql(sql);
-            htmlWriter.writeHtml("", products, true, false);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        htmlWriter.writeHtmlBySql("SELECT * FROM PRODUCT", false, "");
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
     }

@@ -10,14 +10,30 @@ public class HtmlWriter {
         this.writer = writer;
     }
 
+    public void writeHtmlBySql(String sql, boolean isIntRes, String prefix) {
+        try {
+            List<Product> products = null;
+            if (isIntRes) {
+                prefix += DataBase.getIntBySql(sql);
+            } else {
+                products = DataBase.getProductsBySql(sql);
+            }
+            writeHtml(prefix, products, true, !isIntRes);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void writeHtml(String prefix, List<Product> products, boolean isNeedHtmlBodyTags, boolean isNeedH1Tag) {
         if (isNeedHtmlBodyTags) {
             writer.println("<html><body>");
         }
-        if (isNeedH1Tag) {
-            writer.println("<h1>" + prefix + "</h1>");
-        } else if (prefix.length() != 0) {
-            writer.println(prefix);
+        if (prefix.length() != 0) {
+            if (isNeedH1Tag) {
+                writer.println("<h1>" + prefix + "</h1>");
+            } else {
+                writer.println(prefix);
+            }
         }
         if (products != null) {
             for (Product product : products) {

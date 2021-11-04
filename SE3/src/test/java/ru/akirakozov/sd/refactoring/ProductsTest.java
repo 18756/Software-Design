@@ -56,12 +56,6 @@ public class ProductsTest {
 
     private void cleanDataBase() throws SQLException {
         DataBase.makeSqlUpdateQuery("DROP TABLE IF EXISTS PRODUCT");
-        /*try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            String sql = "DROP TABLE IF EXISTS PRODUCT";
-            Statement stmt = c.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-        }*/
     }
 
     private String makeQuery(String url) {

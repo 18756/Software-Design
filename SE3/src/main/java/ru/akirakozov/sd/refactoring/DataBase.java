@@ -13,14 +13,11 @@ public class DataBase {
     private static void openConnection(String sql) throws SQLException {
         connection = DriverManager.getConnection(DATA_BASE_PATH);
         stmt = connection.createStatement();
-
     }
 
     private static void closeConnection() throws SQLException {
         stmt.close();
         connection.close();
-        connection = null;
-        stmt = null;
     }
 
     public static void makeSqlUpdateQuery(String sql) throws SQLException {
@@ -46,7 +43,6 @@ public class DataBase {
     public static int getIntBySql(String sql) throws SQLException {
         openConnection(sql);
         ResultSet rs = stmt.executeQuery(sql);
-        List<Product> products = new ArrayList<>();
         int res = rs.getInt(1);
         rs.close();
         closeConnection();
