@@ -16,19 +16,20 @@ import java.sql.Statement;
  * @author akirakozov
  */
 public class Main {
-    private static Server server;
     public static void main(String[] args) throws Exception {
-        runServer();
+        Server server = makeServer();
+        server.start();
+        server.join();
     }
 
-    public static void runServer() throws Exception {
+    public static Server makeServer() throws Exception {
         String sql = "CREATE TABLE IF NOT EXISTS PRODUCT" +
                 "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
                 " NAME           TEXT    NOT NULL, " +
                 " PRICE          INT     NOT NULL)";
         DataBase.makeSqlUpdateQuery(sql);
 
-        server = new Server(8081);
+        Server server = new Server(8081);
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
@@ -38,11 +39,6 @@ public class Main {
         context.addServlet(new ServletHolder(new GetProductsServlet()),"/get-products");
         context.addServlet(new ServletHolder(new QueryServlet()),"/query");
 
-        server.start();
-        server.join();
-    }
-
-    public static void stopServer() throws Exception {
-        server.stop();
+        return server;
     }
 }

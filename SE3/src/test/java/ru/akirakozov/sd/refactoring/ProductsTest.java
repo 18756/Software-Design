@@ -1,7 +1,7 @@
 package ru.akirakozov.sd.refactoring;
 
+import org.eclipse.jetty.server.Server;
 import org.junit.jupiter.api.*;
-
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,48 +9,25 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProductsTest {
-    private Thread serverThread;
+    private Server server;
     private final String URL_PREFIX = "http://localhost:8081/";
     private final Random random = new Random();
-
 
     @BeforeEach
     public void setUp() throws Exception {
         cleanDataBase();
-        serverThread = new Thread(() -> {
-            try {
-                Main.runServer();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        serverThread.start();
-        while (!isServerRun()) {
-            Thread.sleep(100);
-        }
-    }
-
-    private boolean isServerRun() {
-        try {
-            getProducts(false);
-            return true;
-        } catch (UncheckedIOException e) {
-            return false;
-        }
+        server = Main.makeServer();
+        server.start();
     }
 
     @AfterEach
     public void tearDown() throws Exception {
-        Main.stopServer();
-        serverThread.join();
+        server.stop();
         cleanDataBase();
     }
 
@@ -95,11 +72,7 @@ public class ProductsTest {
     }
 
     private String makeHtml(String text) {
-        StringBuilder html = new StringBuilder();
-        html.append("<html><body>");
-        html.append(text);
-        html.append("</body></html>");
-        return html.toString();
+        return Html.generateHtml(text, null, true, false);
     }
 
     private void addProducts(List<Product> products) {
@@ -168,14 +141,12 @@ public class ProductsTest {
                 mostCheapestProductNames.add(product.name);
             }
         }
-        print(products);
         addProducts(products);
         Assertions.assertEquals(makeHtml("Summary price: " + sumPrice),
                 makeCommand("sum", true));
 
         Assertions.assertEquals(makeHtml("Number of products: " + products.size()),
                 makeCommand("count", true));
-
 
         List<Product> getProductResponse = parseResponse(
                 getProducts(true),
@@ -187,22 +158,19 @@ public class ProductsTest {
                 makeCommand("max", true),
                 "<html><body><h1>Product with max price: </h1>",
                 "</body></html>");
+
         Assertions.assertTrue(maxProductResponse.size() == 1 &&
                 maxProductResponse.get(0).price == maxPrice &&
                 mostExpensiveProductNames.contains(maxProductResponse.get(0).name));
+
         List<Product> minProductResponse = parseResponse(
                 makeCommand("min", true),
                 "<html><body><h1>Product with min price: </h1>",
                 "</body></html>");
+
         Assertions.assertTrue(minProductResponse.size() == 1 &&
                 minProductResponse.get(0).price == minPrice &&
                 mostCheapestProductNames.contains(minProductResponse.get(0).name));
-    }
-
-    private void print(List<Product> products) {
-        for (Product product : products) {
-            System.out.println(product.name + " : " + product.price);
-        }
     }
 
     private List<Product> parseResponse(String response, String prefix, String suffix) throws Exception {
