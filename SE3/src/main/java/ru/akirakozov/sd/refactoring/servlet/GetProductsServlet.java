@@ -1,6 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.DataBase;
+import ru.akirakozov.sd.refactoring.HtmlWriter;
 import ru.akirakozov.sd.refactoring.Product;
 
 import javax.servlet.http.HttpServlet;
@@ -16,13 +17,11 @@ public class GetProductsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HtmlWriter htmlWriter = new HtmlWriter(response.getWriter());
         try {
-            response.getWriter().println("<html><body>");
-            List<Product> products = DataBase.getProductsBySql("SELECT * FROM PRODUCT");
-            for (Product product : products) {
-                response.getWriter().println(product.name + "\t" + product.price + "</br>");
-            }
-            response.getWriter().println("</body></html>");
+            String sql = "SELECT * FROM PRODUCT";
+            List<Product> products = DataBase.getProductsBySql(sql);
+            htmlWriter.writeHtml("", products, true, false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -10,9 +10,10 @@ public class DataBase {
     private static Connection connection;
     private static Statement stmt;
 
-    private static void openConnection() throws SQLException {
+    private static void openConnection(String sql) throws SQLException {
         connection = DriverManager.getConnection(DATA_BASE_PATH);
         stmt = connection.createStatement();
+
     }
 
     private static void closeConnection() throws SQLException {
@@ -23,13 +24,13 @@ public class DataBase {
     }
 
     public static void makeSqlUpdateQuery(String sql) throws SQLException {
-        openConnection();
+        openConnection(sql);
         stmt.executeUpdate(sql);
         closeConnection();
     }
 
     public static List<Product> getProductsBySql(String sql) throws SQLException {
-        openConnection();
+        openConnection(sql);
         ResultSet rs = stmt.executeQuery(sql);
         List<Product> products = new ArrayList<>();
         while (rs.next()) {
@@ -42,11 +43,13 @@ public class DataBase {
         return products;
     }
 
-    public static void makeSqlGetQuery(String sql, Consumer<ResultSet> consumer) throws SQLException {
-        openConnection();
+    public static int getIntBySql(String sql) throws SQLException {
+        openConnection(sql);
         ResultSet rs = stmt.executeQuery(sql);
-        consumer.accept(rs);
+        List<Product> products = new ArrayList<>();
+        int res = rs.getInt(1);
         rs.close();
         closeConnection();
+        return res;
     }
 }
